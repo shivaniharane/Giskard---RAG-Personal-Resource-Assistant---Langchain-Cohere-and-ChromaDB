@@ -1,0 +1,272 @@
+# ============================================================
+# Giskard RAG — Research Paper Assistant with AI Safety Testing
+# Requirements File
+# ============================================================
+# Install all dependencies with:
+#   pip install langchain-cohere langchain pdfminer.six chromadb "giskard[llm]"
+#
+# For Google Colab, run in a notebook cell:
+#   !pip install langchain-cohere langchain pdfminer.six chromadb "giskard[llm]"
+#
+# Python version required: >= 3.10
+# Verify with: python --version
+#
+# TWO API KEYS REQUIRED:
+#   COHERE_API_KEY → https://dashboard.cohere.com (free trial: 20 calls/month)
+#   OPENAI_API_KEY → https://platform.openai.com/api-keys (used by Giskard scanner)
+# ============================================================
+
+# --------------------------
+# Core: LangChain Framework
+# --------------------------
+langchain>=0.2.0               # Core LangChain framework
+                               # Provides:
+                               # - PromptTemplate, ChatPromptTemplate
+                               # - StrOutputParser (output parsing)
+                               # - RunnableParallel (parallel execution)
+                               # - RunnablePassthrough (passthrough)
+                               # - RecursiveCharacterTextSplitter (chunking)
+                               # - Document (document object)
+                               # - LCEL (pipe operator chain building)
+
+langchain-core>=0.2.0          # Core LangChain abstractions
+                               # (installed automatically with langchain)
+
+langchain-community>=0.2.0     # Community integrations
+                               # Provides:
+                               # - Chroma vectorstore integration
+                               # - ChromaDB wrapper for LangChain
+
+langchain-text-splitters>=0.2.0 # Text splitting utilities
+                               # Provides:
+                               # - RecursiveCharacterTextSplitter
+                               # (may be bundled with langchain, listed for clarity)
+
+# --------------------------
+# LLM + Embeddings: Cohere
+# --------------------------
+langchain-cohere>=0.1.0        # Cohere integration for LangChain
+                               # Provides:
+                               # - ChatCohere (LLM for answer generation)
+                               #   Model: command-r-08-2024 (temperature=0)
+                               # - CohereEmbeddings (for PDF chunks + queries)
+                               #   Model: embed-english-v3.0 (1024-dim vectors)
+                               #
+                               # ⚠️ IMPORTANT MODEL NOTE:
+                               # command-r-plus was removed September 15, 2025
+                               # Use command-r-08-2024 or command-r-plus-08-2024
+                               # See: https://docs.cohere.com/docs/models#command
+
+cohere>=5.0.0                  # Cohere Python SDK (required by langchain-cohere)
+                               # Free trial: 20 trial endpoint calls/month
+                               # Get key at: https://dashboard.cohere.com
+
+# --------------------------
+# Vector Database: ChromaDB
+# --------------------------
+chromadb>=0.5.0                # Embedded persistent vector database
+                               # No server required — runs as a local file
+                               # persist_directory="/content/chroma_db"
+                               # Stores: text chunks + embedding vectors + metadata
+                               # Used for: similarity_search_with_relevance_scores()
+                               #           and as_retriever()
+
+# --------------------------
+# PDF Processing
+# --------------------------
+pdfminer.six>=20221105         # PDF text extraction library
+                               # Used for: extract_text() from research paper PDFs
+                               # Handles: complex PDF layouts, multi-column text
+                               # Import: from pdfminer.high_level import extract_text
+
+# --------------------------
+# AI Safety Testing: Giskard
+# --------------------------
+giskard[llm]>=2.0.0            # AI safety and vulnerability scanner
+                               # The [llm] extra installs LLM-specific dependencies
+                               # Provides:
+                               # - giskard.Model (wraps your chain as a Giskard model)
+                               # - giskard.Dataset (wraps test examples as dataset)
+                               # - giskard.scan() (runs 5 safety scans automatically)
+                               # - report.to_html() (exports safety report)
+                               #
+                               # Scan categories in this project:
+                               # - hallucination
+                               # - robustness
+                               # - prompt injections
+                               # - information disclosure
+                               # - harmful content generation
+                               #
+                               # ⚠️ Giskard uses OpenAI internally to generate
+                               # adversarial test cases — OPENAI_API_KEY required
+
+# --------------------------
+# Data Processing
+# --------------------------
+pandas>=2.0.0                  # DataFrame support for Giskard model wrapper
+                               # model_predict(df: pd.DataFrame) → list[str]
+                               # giskard.Dataset(pd.DataFrame({"question": examples}))
+
+# --------------------------
+# OpenAI (for Giskard scanner)
+# --------------------------
+openai>=1.30.0                 # OpenAI Python SDK
+                               # Used ONLY by Giskard's scan engine
+                               # NOT used by the RAG chain directly
+                               # GPT-4 generates adversarial test cases + evaluates responses
+                               # Set: OPENAI_API_KEY environment variable
+
+# --------------------------
+# Data Validation
+# --------------------------
+pydantic>=2.0.0                # Data validation (required by LangChain)
+
+# --------------------------
+# Local Environment Support
+# --------------------------
+python-dotenv>=1.0.0           # Load API keys from .env file (local development)
+                               # Not needed in Google Colab — use Secrets panel
+
+# ============================================================
+# Optional: Persistent Storage Backends
+# ============================================================
+# ChromaDB defaults to local filesystem (/content/chroma_db in Colab).
+# For Colab: mount Google Drive and set persist_directory to Drive path.
+# For production: use a managed vector database.
+
+# --- Managed ChromaDB (cloud) ---
+# chromadb-client>=0.5.0       # Chroma Cloud client (hosted ChromaDB)
+                               # No local file management needed
+
+# --- Alternative Vector Databases ---
+# pinecone-client>=3.0.0       # Pinecone managed vector DB (cloud)
+# llama-index-vector-stores-pinecone  # LlamaIndex integration
+
+# qdrant-client>=1.7.0         # Qdrant (open-source, self-hostable)
+# weaviate-client>=4.5.0       # Weaviate vector database
+
+# ============================================================
+# Optional: Alternative LLM Providers
+# ============================================================
+# Replace Cohere with another provider for both LLM and embeddings.
+
+# langchain-openai>=0.1.0      # Use OpenAI for LLM (GPT-4o-mini, GPT-4o)
+                               # Replace ChatCohere → ChatOpenAI
+                               # Replace CohereEmbeddings → OpenAIEmbeddings
+
+# langchain-anthropic>=0.1.0   # Anthropic Claude (claude-3-haiku, claude-3-sonnet)
+                               # Replace ChatCohere → ChatAnthropic
+
+# langchain-ollama>=0.1.0      # Ollama — free local LLMs (llama3, mistral)
+                               # No API key needed — runs on your machine
+                               # Replace ChatCohere → ChatOllama
+
+# --------------------------
+# Optional: Alternative Embeddings
+# --------------------------
+# langchain-huggingface>=0.0.3   # Free HuggingFace embeddings (no API key)
+                                 # Replace CohereEmbeddings → HuggingFaceEmbeddings
+                                 # Model: "sentence-transformers/all-MiniLM-L6-v2"
+
+# sentence-transformers>=2.7.0   # Required for HuggingFace embeddings locally
+
+# ============================================================
+# Optional: Conversation Memory
+# ============================================================
+
+# langchain-memory or use langchain's built-in memory:
+# from langchain.memory import ConversationBufferMemory
+# from langchain.chains import ConversationalRetrievalChain
+# (both included in langchain>=0.2.0)
+
+# ============================================================
+# Optional: UI Frameworks
+# ============================================================
+
+# gradio>=4.0.0                # Quick chat UI for interactive paper Q&A
+# streamlit>=1.30.0            # Full web app framework
+
+# ============================================================
+# Optional: Enhanced PDF Processing
+# ============================================================
+
+# pypdf>=4.0.0                 # Alternative PDF parser (handles more PDF types)
+# pymupdf>=1.24.0              # Fastest PDF parser (fitz), handles scanned PDFs
+
+# unstructured>=0.14.0         # Advanced document parsing (tables, images)
+                               # Handles PDFs with complex layouts better than pdfminer
+
+# ============================================================
+# Optional: Evaluation (complement to Giskard)
+# ============================================================
+
+# deepeval>=1.0.0              # DeepEval — complements Giskard
+                               # Giskard: security/safety testing
+                               # DeepEval: quality metrics (faithfulness, coherence)
+                               # Use both together for full coverage
+
+# ragas>=0.1.0                 # RAGAS — RAG-specific metrics
+                               # Contextual precision, recall, answer relevancy
+
+# ============================================================
+# NOTES FOR DEVELOPERS
+# ============================================================
+#
+# 1. COHERE MODEL VERSIONS (CRITICAL)
+#    command-r-plus was PERMANENTLY REMOVED on September 15, 2025.
+#    Always use dated versions:
+#      command-r-08-2024         → standard, recommended
+#      command-r-plus-08-2024   → more capable, higher token cost
+#      command-r7b-12-2024      → lightweight, saves trial quota
+#      command-a-03-2025        → latest flagship
+#    Check current models: https://docs.cohere.com/docs/models#command
+#
+# 2. COHERE TRIAL KEY LIMITS
+#    Free trial keys are limited to 20 calls/month on trial endpoints.
+#    The Giskard scan calls chain.invoke() for EVERY generated test case.
+#    A 5-category Giskard scan may generate 50-150 test invocations.
+#    To avoid hitting limits:
+#      a) Use command-r7b-12-2024 (fewer tokens per call)
+#      b) Scan only 1-2 categories at a time: only=["hallucination"]
+#      c) Upgrade to a paid Cohere key for full scans
+#
+# 3. TWO API KEYS REQUIRED
+#    COHERE_API_KEY: for embeddings (CohereEmbeddings) + generation (ChatCohere)
+#    OPENAI_API_KEY: for Giskard's internal scan engine (GPT-4 generates tests)
+#    Without OPENAI_API_KEY, giskard.scan() will fail.
+#
+# 4. CHROMADB PERSISTENCE IN COLAB
+#    /content/chroma_db is DELETED when Colab session disconnects.
+#    For persistence: mount Google Drive and set:
+#      persist_directory = "/content/drive/MyDrive/chroma_rag_db"
+#    First run: indexes all PDFs (slow, costs Cohere API calls)
+#    Subsequent runs: loads instantly from Drive (no re-embedding)
+#
+# 5. GISKARD REPORT MUST BE SAVED BEFORE SESSION ENDS
+#    report.to_html("giskard_report.html") saves to /content/ (ephemeral)
+#    Always run IMMEDIATELY after scan:
+#      from google.colab import files
+#      files.download("giskard_report.html")
+#    OR copy to Drive:
+#      !cp giskard_report.html "/content/drive/MyDrive/"
+#
+# 6. raise_exceptions=True STOPS SCAN ON FIRST ERROR
+#    If any test case raises a Python exception, the entire scan aborts.
+#    For more resilient scanning (especially with trial key rate limits):
+#      giskard.scan(model, dataset, raise_exceptions=False)
+#
+# 7. CHUNK SIZE GUIDANCE FOR RESEARCH PAPERS
+#    chunk_size=2048, chunk_overlap=512 (used in this project):
+#      → Good for dense academic text with long paragraphs
+#    For papers with many equations/formulas:
+#      chunk_size=1024, chunk_overlap=256 → better precision
+#    For papers with tables:
+#      Consider unstructured library for better table extraction
+#
+# 8. DEFAULT RETRIEVER RETURNS k=4 CHUNKS
+#    vectordb.as_retriever() retrieves 4 chunks by default.
+#    For complex multi-part questions:
+#      vectordb.as_retriever(search_kwargs={"k": 6})
+#    For focused single-topic questions:
+#      vectordb.as_retriever(search_kwargs={"k": 2})
+# ============================================================
